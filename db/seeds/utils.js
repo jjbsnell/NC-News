@@ -6,4 +6,11 @@ exports.convertTimestampToDate = ({ created_at, ...otherProperties }) => {
 };
 
 
+exports.createRef = (array, key, value) => {
+  return array.reduce((ref, item) => {
+    ref[item[key]] = item[value];
+    return ref;
+  }, {});
+};
+
 
