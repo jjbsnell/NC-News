@@ -14,3 +14,29 @@ describe("GET /api", () => {
       });
   });
 });
+
+
+
+describe('GET /api/topics', () => {
+  test('200: responds with an array of topics, each having slug and description', () => {
+    
+return request(app)
+      .get('/api/topics')
+      .expect(200)
+      .then((res) => {
+        const { topics } = res.body;
+
+        
+   expect(Array.isArray(topics)).toBe(true);
+   expect(topics.length).toBeGreaterThan(0);
+    topics.forEach((topic) => {
+          expect(topic).toEqual(
+          expect.objectContaining({
+          slug: expect.any(String),
+          description: expect.any(String),
+            })
+          );
+        });
+      });
+  });
+});
