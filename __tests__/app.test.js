@@ -40,3 +40,27 @@ return request(app)
       });
   });
 });
+
+
+describe('GET /api/articles/:article_id', () => {
+  test('responds with the correct article object for a valid ID', () => {
+    return request(app)
+      .get('/api/articles/1')
+      .expect(200)
+      .then((response) => {
+        const article = response.body.article;
+
+        expect(article).toEqual(
+          expect.objectContaining({
+            author: expect.any(String),
+            title: expect.any(String),
+            article_id: 1,
+            body: expect.any(String),
+            topic: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+          })
+        );
+      });
+    })})
