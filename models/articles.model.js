@@ -48,3 +48,34 @@ exports.selectArticles = () => {
       return rows[0];
     });
   };
+
+  exports.selectArticles = (sort_by = 'created_at', order = 'desc') => {
+    const validSortColumns = [
+      'article_id', 'title', 'topic', 'author',
+      'created_at', 'votes', 'article_img_url', 'comment_count'
+    ];
+  
+    const validOrder = ['asc', 'desc'];
+  
+    if (!validSortColumns.includes(sort_by) || !validOrder.includes(order.toLowerCase())) {
+      return Promise.reject({ status: 400, msg: 'Bad Request' });
+    }
+  
+    const queryStr = `
+      SELECT 
+        articles.author,
+        articles.title,
+        articles.article_id,
+        articles.topic,
+        articles.created_at,
+        articles.votes,
+        articles.article_img_url,
+        COUNT(comments.comment_id)::INT AS comment_count
+      FROM articles
+      LEFT JOIN comments ON comments.article_id = articles.article_id
+      GROUP BY articles.article_id
+      ORDER BY ${sort_by} ${order.toUpperCase()};
+    `;
+  
+    return db.query(queryStr).then(({ rows }) => rows);
+  };
