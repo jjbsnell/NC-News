@@ -12,25 +12,31 @@ app.get('/api', (req, res) => {
   app.get('/api/topics', getTopics);
 
   app.get('/api/articles/:article_id', getArticleById);
-  
-  app.use((err, req, res, next) => {
-    if (err.status && err.msg) {
-      res.status(err.status).send({ msg: err.msg });
-    } else if (err.code === '22P02') {
-      res.status(400).send({ msg: 'Bad Request' });
-    } else {
-      console.log(err);
-      res.status(500).send({ msg: 'Internal Server Error' });
-    }
-  });
-  
-  const { getArticles } = require('./controllers/articles.controller');
+
+const { getArticles } = require('./controllers/articles.controller');
 
 app.get('/api/articles', getArticles);
 
+const { getCommentsByArticleId } = require('./controllers/comments.controller');
+
+app.get('/api/articles/:article_id/comments', getCommentsByArticleId);
 
 
 
 
+app.get('/api/articles/:article_id/comments', getCommentsByArticleId);
 
-  module.exports = app;
+
+app.use((err, req, res, next) => {
+  if (err.status && err.msg) {
+    res.status(err.status).send({ msg: err.msg });
+  } else if (err.code === '22P02') {
+    res.status(400).send({ msg: 'Bad Request' });
+  } else {
+    console.log(err);
+    res.status(500).send({ msg: 'Internal Server Error' });
+  }
+});
+
+
+module.exports = app;
