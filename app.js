@@ -1,37 +1,33 @@
 const express = require('express');
 const app = express();
 const endpoints = require('./endpoints.json');
+
+
 app.use(express.json());
+
+
 const { getTopics } = require('./controllers/topics.controller');
 const { getArticleById } = require('./controllers/articles.controller');
+const { getArticles } = require('./controllers/articles.controller');
+const { patchArticleById } = require('./controllers/articles.controller');
+const { getCommentsByArticleId } = require('./controllers/comments.controller');
+const { postCommentByArticleId } = require('./controllers/comments.controller');
+const { deleteCommentById } = require('./controllers/comments.controller');
+
 
 app.get('/api', (req, res) => {
-    res.status(200).send({ endpoints });
-  });
+  res.status(200).send({ endpoints });
+});
 
-  app.get('/api/topics', getTopics);
-
-  app.get('/api/articles/:article_id', getArticleById);
-
-const { getArticles } = require('./controllers/articles.controller');
-
+app.get('/api/topics', getTopics);
+app.get('/api/articles/:article_id', getArticleById);
 app.get('/api/articles', getArticles);
-
-const { getCommentsByArticleId } = require('./controllers/comments.controller');
-
-const { postCommentByArticleId } = require('./controllers/comments.controller');
-
-app.get('/api/articles/:article_id/comments', getCommentsByArticleId);
-
-app.post('/api/articles/:article_id/comments', postCommentByArticleId);
-
-
-const { patchArticleById } = require('./controllers/articles.controller');
 app.patch('/api/articles/:article_id', patchArticleById);
 
-
-
 app.get('/api/articles/:article_id/comments', getCommentsByArticleId);
+app.post('/api/articles/:article_id/comments', postCommentByArticleId);
+
+app.delete('/api/comments/:comment_id', deleteCommentById);
 
 
 app.use((err, req, res, next) => {
@@ -52,6 +48,5 @@ app.use((err, req, res, next) => {
     res.status(500).send({ msg: 'Internal Server Error' });
   }
 });
-
 
 module.exports = app;
