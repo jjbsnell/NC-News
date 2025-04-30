@@ -26,7 +26,8 @@ app.get('/api/articles/:article_id/comments', getCommentsByArticleId);
 app.post('/api/articles/:article_id/comments', postCommentByArticleId);
 
 
-
+const { patchArticleById } = require('./controllers/articles.controller');
+app.patch('/api/articles/:article_id', patchArticleById);
 
 
 
