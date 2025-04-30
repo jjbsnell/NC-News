@@ -121,3 +121,61 @@ describe('GET /api/articles', () => {
       });
   });
 });
+
+
+describe('GET /api/articles/:article_id/comments', () => {
+  test('200: responds with an array of comments for the given article_id', () => {
+    return request(app)
+      .get('/api/articles/1/comments')
+      .expect(200)
+      .then(({ body }) => {
+        const { comments } = body;
+        expect(Array.isArray(comments)).toBe(true);
+        comments.forEach((comment) => {
+          expect(comment).toEqual(
+            expect.objectContaining({
+              comment_id: expect.any(Number),
+              votes: expect.any(Number),
+              created_at: expect.any(String),
+              author: expect.any(String),
+              body: expect.any(String),
+              article_id: 1
+            })
+          );
+        });
+       
+        for (let i = 1; i < comments.length; i++) {
+          const current = new Date(comments[i].created_at).getTime();
+          const previous = new Date(comments[i - 1].created_at).getTime();
+          expect(current).toBeLessThanOrEqual(previous);
+        }
+      });
+  });
+
+  test('200: responds with an empty array if the article exists but has no comments', () => {
+    return request(app)
+      .get('/api/articles/4/comments') 
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comments).toEqual([]);
+      });
+  });
+
+  test('400: responds with "Bad Request" if article_id is not a number', () => {
+    return request(app)
+      .get('/api/articles/notanumber/comments')
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Bad Request');
+      });
+  });
+
+  test('404: responds with "Article not found" if article does not exist', () => {
+    return request(app)
+      .get('/api/articles/999999/comments')
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Article not found');
+      });
+  });
+});
