@@ -25,3 +25,15 @@ exports.selectCommentsByArticleId = async (article_id) => {
 
   return result.rows;
 };
+
+exports.insertCommentByArticleId = async (article_id, username, body) => {
+    const result = await db.query(
+      `
+      INSERT INTO comments (author, body, article_id)
+      VALUES ($1, $2, $3)
+      RETURNING comment_id, votes, created_at, author, body, article_id;
+      `,
+      [username, body, article_id]
+    );
+    return result.rows[0];
+  };

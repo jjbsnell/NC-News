@@ -179,3 +179,72 @@ describe('GET /api/articles/:article_id/comments', () => {
       });
   });
 });
+
+
+
+describe('POST /api/articles/:article_id/comments', () => {
+  test('201: responds with the posted comment', () => {
+    const newComment = {
+      username: 'icellusedkars',
+      body: 'Nice article!'
+    };
+
+    return request(app)
+      .post('/api/articles/1/comments')
+      .send(newComment)
+      .expect(201)
+      .then(({ body }) => {
+        const { comment } = body;
+        expect(comment).toEqual(
+          expect.objectContaining({
+            comment_id: expect.any(Number),
+            votes: 0,
+            created_at: expect.any(String),
+            author: 'icellusedkars',
+            body: 'Nice article!',
+            article_id: 1
+          })
+        );
+      });
+  });
+
+  test('400: responds with "Bad Request" if required fields are missing', () => {
+    return request(app)
+      .post('/api/articles/1/comments')
+      .send({})
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Bad Request');
+      });
+  });
+
+  test('400: responds with "Bad Request" if article_id is invalid', () => {
+    return request(app)
+      .post('/api/articles/notanid/comments')
+      .send({ username: 'icellusedkars', body: 'Cool' })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Bad Request');
+      });
+  });
+
+  test('404: responds with "Article not found" if article does not exist', () => {
+    return request(app)
+      .post('/api/articles/9999/comments')
+      .send({ username: 'icellusedkars', body: 'Nice try' })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Article not found');
+      });
+  });
+
+  test('404: responds with "User not found" if username does not exist', () => {
+    return request(app)
+      .post('/api/articles/1/comments')
+      .send({ username: 'not_a_user', body: 'Hello?' })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe('User not found');
+      });
+  });
+});
