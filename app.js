@@ -13,6 +13,7 @@ const { patchArticleById } = require('./controllers/articles.controller');
 const { getCommentsByArticleId } = require('./controllers/comments.controller');
 const { postCommentByArticleId } = require('./controllers/comments.controller');
 const { deleteCommentById } = require('./controllers/comments.controller');
+const { getUsers } = require('./controllers/users.controller');
 
 
 app.get('/api', (req, res) => {
@@ -28,6 +29,8 @@ app.get('/api/articles/:article_id/comments', getCommentsByArticleId);
 app.post('/api/articles/:article_id/comments', postCommentByArticleId);
 
 app.delete('/api/comments/:comment_id', deleteCommentById);
+
+app.get('/api/users', getUsers);
 
 
 app.use((err, req, res, next) => {
