@@ -2,6 +2,8 @@ const endpointsJson = require("../endpoints.json");
 /* Set up your test imports here */
 const request = require('supertest');
 const app = require('../app');
+
+
 /* Set up your beforeEach & afterAll functions here */
 
 describe("GET /api", () => {
@@ -390,6 +392,40 @@ describe('GET /api/articles (with sorting queries)', () => {
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe('Bad Request');
+      });
+  });
+});
+
+
+describe("GET /api/articles?topic=...", () => {
+  test("200: returns articles filtered by a valid topic", () => {
+    return request(app)
+      .get("/api/articles?topic=cats")
+      .expect(200)
+      .then(({ body }) => {
+        expect(Array.isArray(body.articles)).toBe(true);
+        expect(body.articles.length).toBeGreaterThan(0);
+        body.articles.forEach((article) => {
+          expect(article.topic).toBe("cats");
+        });
+      });
+  });
+
+  test("200: valid topic with no articles returns empty array", () => {
+    return request(app)
+      .get("/api/articles?topic=paper")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toEqual([]);
+      });
+  });
+
+  test("404: invalid topic returns 'Topic not found'", () => {
+    return request(app)
+      .get("/api/articles?topic=notarealtopic")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Topic not found");
       });
   });
 });

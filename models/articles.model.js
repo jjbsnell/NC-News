@@ -49,33 +49,49 @@ exports.selectArticles = () => {
     });
   };
 
-  exports.selectArticles = (sort_by = 'created_at', order = 'desc') => {
+  exports.selectArticles = async (topic, sort_by = "created_at", order = "desc") => {
     const validSortColumns = [
-      'article_id', 'title', 'topic', 'author',
-      'created_at', 'votes', 'article_img_url', 'comment_count'
+      "article_id", "title", "topic", "author", "created_at",
+      "votes", "article_img_url", "comment_count"
     ];
+    const validOrders = ["asc", "desc"];
   
-    const validOrder = ['asc', 'desc'];
-  
-    if (!validSortColumns.includes(sort_by) || !validOrder.includes(order.toLowerCase())) {
-      return Promise.reject({ status: 400, msg: 'Bad Request' });
+    if (!validSortColumns.includes(sort_by) || !validOrders.includes(order.toLowerCase())) {
+      return Promise.reject({ status: 400, msg: "Bad Request" });
     }
   
-    const queryStr = `
-      SELECT 
-        articles.author,
-        articles.title,
-        articles.article_id,
-        articles.topic,
-        articles.created_at,
-        articles.votes,
-        articles.article_img_url,
-        COUNT(comments.comment_id)::INT AS comment_count
+    const queryValues = [];
+    let queryStr = `
+      SELECT articles.article_id,
+             articles.title,
+             articles.topic,
+             articles.author,
+             articles.created_at,
+             articles.votes,
+             articles.article_img_url,
+             COUNT(comments.comment_id)::INT AS comment_count
       FROM articles
       LEFT JOIN comments ON comments.article_id = articles.article_id
-      GROUP BY articles.article_id
-      ORDER BY ${sort_by} ${order.toUpperCase()};
     `;
   
-    return db.query(queryStr).then(({ rows }) => rows);
+    if (topic) {
+      queryValues.push(topic);
+      queryStr += `WHERE articles.topic = $1 `;
+    }
+  
+    queryStr += `
+      GROUP BY articles.article_id
+      ORDER BY ${sort_by === "comment_count" ? "comment_count" : `articles.${sort_by}`} ${order.toUpperCase()};
+    `;
+  
+    const { rows } = await db.query(queryStr, queryValues);
+  
+    if (topic && rows.length === 0) {
+      const topicExists = await db.query(`SELECT * FROM topics WHERE slug = $1;`, [topic]);
+      if (topicExists.rows.length === 0) {
+        return Promise.reject({ status: 404, msg: "Topic not found" });
+      }
+    }
+  
+    return rows;
   };
