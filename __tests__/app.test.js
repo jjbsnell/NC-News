@@ -43,27 +43,28 @@ return request(app)
 
 
 describe('GET /api/articles/:article_id', () => {
-  test('200: responds with the correct article object for a valid ID', () => {
+  test('200: responds with the correct article object including comment_count', () => {
     return request(app)
       .get('/api/articles/1')
       .expect(200)
-      .then((response) => {
-        const article = response.body.article;
-
+      .then(({ body }) => {
+        const article = body.article;
         expect(article).toEqual(
           expect.objectContaining({
-            author: expect.any(String),
-            title: expect.any(String),
             article_id: 1,
-            body: expect.any(String),
+            title: expect.any(String),
             topic: expect.any(String),
+            author: expect.any(String),
+            body: expect.any(String),
             created_at: expect.any(String),
             votes: expect.any(Number),
             article_img_url: expect.any(String),
+            comment_count: expect.any(Number),
           })
         );
       });
   });
+});
 
   test('404: responds with "Article not found" for valid but non-existent article_id', () => {
     return request(app)
@@ -84,7 +85,7 @@ describe('GET /api/articles/:article_id', () => {
         expect(errorResponse.msg).toBe('Bad Request');
       });
   });
-});
+
 
 
 describe('GET /api/articles', () => {
